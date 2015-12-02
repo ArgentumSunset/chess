@@ -2,15 +2,15 @@ class Space
 
 	attr_accessor :x, :y, :dimen, :color, :zorder
 
-	def initialize(x,y,dimen,color)
+    def initialize(x,y,dimen,color,zorder)
 		@x = x
 		@y = y
 		@dimen = dimen
 		@color = color
-		@zorder = 0
+        @zorder = zorder
 	end
 
-	def draw_shape	
+	def draw
 		Gosu.draw_line(x, y, color, x + dimen, y, color, zorder)
 		Gosu.draw_line(x + dimen, y, color, x + dimen, y + dimen, color, zorder)
 		Gosu.draw_line(x + dimen, y + dimen, color, x, y + dimen, color, zorder)
