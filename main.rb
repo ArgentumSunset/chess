@@ -46,13 +46,18 @@ class GameWindow < Gosu::Window
     end
 
     def update
+    	if Gosu::button_down? Gosu::MsLeft
+    		@pieces.each{|piece|
+    			if mouse_x.between?(piece.x, piece.x + piece.image.width) && mouse_y.between?(piece.y, piece.y + piece.image.height)
+    				piece.validate_moves
+    			end
+    		}
+    	end
     	@spaces.each{|space| 
 			if space.highlighted
 				space.color = Gosu::Color.argb(0xff_2ecc71)
-				puts space.color
 			end
 		}
-     end
    end
 
 	private
