@@ -1,13 +1,20 @@
 class Space
 
-	attr_accessor :x, :y, :dimen, :color, :zorder
+	DIMEN = 1000
+	MARGIN = DIMEN / 10
+	SPACE_DIMEN = (DIMEN - (2 * MARGIN))/8
 
-    def initialize(x,y,dimen,color,zorder)
+	attr_accessor :x, :y, :xpos, :ypos, :dimen, :color, :zorder, :highlighted
+
+    def initialize(x,y,xpos,ypos,dimen,color,zorder)
 		@x = x
 		@y = y
+		@xpos = xpos
+		@ypos = ypos
 		@dimen = dimen
 		@color = color
-        @zorder = zorder
+    @zorder = zorder
+    @highlighted = false
 	end
 
 	def draw
@@ -19,6 +26,10 @@ class Space
 		fill_shape(color)
 	end
 
+	def highlight
+		@highlighted = true
+	end
+
 	private
 
 	def fill_shape(color)
@@ -26,4 +37,5 @@ class Space
 			Gosu.draw_line(x + i, y + dimen, color, x + i, y, color, zorder)
 		end
 	end
+
 end
