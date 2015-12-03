@@ -4,18 +4,20 @@ class Space
 	MARGIN = DIMEN / 10
 	SPACE_DIMEN = (DIMEN - (2 * MARGIN))/8
 
-    attr_accessor :x, :y, :xpos, :ypos, :dimen, :color, :stored, :zorder, :highlighted
+    attr_accessor :x, :y, :xpos, :ypos, :dimen, :color, :stored, :zorder, :highlighted, :is_filled
 
-    def initialize(x,y,xpos,ypos,dimen,color,zorder)
+    def initialize(x,y,dimen,color,zorder,window)
 		@x = x
 		@y = y
-		@xpos = xpos
-		@ypos = ypos
+		@xpos = (@x - 100) / 100
+		@ypos = (@y - 100) / 100
 		@dimen = dimen
 		@color = color
         @stored = color
         @zorder = zorder
         @highlighted = false
+        @is_filled = false
+        @window = window
 	end
 
 	def draw
@@ -35,6 +37,14 @@ class Space
         @highlighted = false
         @color = @stored
 	end
+    
+    def filled? 
+        @window.pieces.each {|piece|
+            if @xpos == piece.xpos && @ypos == piece.ypos
+                @is_filled = true
+            end
+            }
+    end
 
 	private
 

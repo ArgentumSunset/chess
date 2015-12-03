@@ -39,7 +39,7 @@ class Piece
     private
     
     def validate
-        @spaces.each{|space| space.highlight}
+        @spaces.each{|space| space.highlight unless space.is_filled}
     end
 
 end

@@ -46,18 +46,23 @@ class GameWindow < Gosu::Window
     end
 
     def update
+        
         if Gosu::button_down? Gosu::MsLeft
+            @spaces.each{|space| space.unhighlight}
     		@pieces.each{|piece|
     			if mouse_x.between?(piece.x, piece.x + piece.image.width) && mouse_y.between?(piece.y, piece.y + piece.image.height)
     				piece.validate_moves
     			end
     		}
     	end
+        
         if Gosu::button_down? Gosu::MsRight
             @spaces.each{|space| space.unhighlight}
         end
+        
     	@spaces.each{|space| 
-			if space.highlighted
+            space.filled?
+            if space.highlighted
 				space.color = Gosu::Color.argb(0xff_2ecc71)
 			end
 		}
@@ -70,7 +75,7 @@ class GameWindow < Gosu::Window
 			for j in 0..7
 				i % 2 == 0 ? h = j : h = j + 1
 				h % 2 == 0 ? color = Gosu::Color.argb(0xff_c0392b) : color = Gosu::Color.argb(0xff_2c3e50)
-				@spaces.push(Space.new(MARGIN + (SPACE_DIMEN * i), MARGIN + (SPACE_DIMEN * j), i, j, SPACE_DIMEN, color, 0))
+				@spaces.push(Space.new(MARGIN + (SPACE_DIMEN * i), MARGIN + (SPACE_DIMEN * j), SPACE_DIMEN, color, 0, self))
 			end
             @pieces.push(Piece.new(i,1,"pawn","white",2,5,self))
             @pieces.push(Piece.new(i,6,"pawn","black",2,5,self))
@@ -81,3 +86,5 @@ end
 
 window = GameWindow.new
 window.show
+window.spaces.each{|space| puts space.is_filled.to_s + " x: " + space.x.to_s + " y: " + space.y.to_s }
+window.pieces.each{|piece| puts piece.piece + " x: " + piece.xpos.to_s + " y: " + piece.ypos.to_s }
