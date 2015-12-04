@@ -16,10 +16,12 @@ class GameWindow < Gosu::Window
 		@spaces = []
 		@pieces = []
 		@i = 0
+		@selected_spaces = []
 		@time = Gosu::milliseconds
+		@selected_pieces = []
         
         data = File.read('pieces.txt')
-		lines = data.split("\n")
+				lines = data.split("\n")
 
         lines.each{|piece| 
         piece_data = piece.split(' ')
@@ -42,30 +44,43 @@ class GameWindow < Gosu::Window
 	end
     
     def needs_cursor?
-        true
+      true
     end
 
     def update
         
         if Gosu::button_down? Gosu::MsLeft
-            @spaces.each{|space| space.unhighlight}
+        @selected_pieces = []
+        @spaces.each{|space| space.unhighlight}
     		@pieces.each{|piece|
-    			if mouse_x.between?(piece.x, piece.x + piece.image.width) && mouse_y.between?(piece.y, piece.y + piece.image.height)
+    			if piece_mouse_between(piece)
     				piece.validate_moves
+    				piece.spaces.each {|space|
+    					@selected_spaces.push(space) unless space.is_filled
+    				}
+    				@selected_pieces.push(piece)
     			end
     		}
     	end
-        
-        if Gosu::button_down? Gosu::MsRight
-            @spaces.each{|space| space.unhighlight}
-        end
+
+    	if Gosu::button_down? Gosu::MsRight
+        @selected_spaces.each{|space| 
+        	if space_mouse_between(space)
+        		@selected_pieces.each{|piece| 
+        			puts "Pre : Xpos " + piece.xpos.to_s + "Ypos " + piece.ypos.to_s
+        			piece.move(space)
+        			puts "Post : Xpos " + piece.xpos.to_s + "Ypos " + piece.ypos.to_s
+        		}
+        	end
+        }
+      end
         
     	@spaces.each{|space| 
-            space.filled?
-            if space.highlighted
-				space.color = Gosu::Color.argb(0xff_2ecc71)
-			end
-		}
+        space.filled?
+        if space.highlighted
+					space.color = Gosu::Color.argb(0xff_2ecc71)
+				end
+			}
     end
 
 	private
@@ -82,9 +97,18 @@ class GameWindow < Gosu::Window
 		end
 	end
 
+	private
+		def piece_mouse_between(piece)
+			mouse_x.between?(piece.x, piece.x + piece.image.width) && mouse_y.between?(piece.y, piece.y + piece.image.height)
+		end
+
+		def space_mouse_between(space)
+			mouse_x.between?(space.x, space.x + space.dimen) && mouse_y.between?(space.y, space.y + space.dimen)
+		end
+
 end
 
 window = GameWindow.new
 window.show
-window.spaces.each{|space| puts space.is_filled.to_s + " x: " + space.x.to_s + " y: " + space.y.to_s }
+window.spaces.each{|space| puts space.is_filled.to_s + " x: " + space.xpos.to_s + " y: " + space.ypos.to_s }
 window.pieces.each{|piece| puts piece.piece + " x: " + piece.xpos.to_s + " y: " + piece.ypos.to_s }

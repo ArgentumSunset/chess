@@ -36,6 +36,11 @@ class Piece
         end
     end
 
+    def move(space)
+        @xpos = space.xpos
+        @ypos = space.ypos
+    end
+
     private
     
     def validate
