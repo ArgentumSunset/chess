@@ -16,7 +16,6 @@ class GameWindow < Gosu::Window
 		@spaces = []
 		@pieces = []
 		@i = 0
-		@selected_spaces = []
 		@time = Gosu::milliseconds
 		@selected_pieces = []
         
@@ -51,12 +50,13 @@ class GameWindow < Gosu::Window
         
         if Gosu::button_down? Gosu::MsLeft
         @selected_pieces = []
-        @spaces.each{|space| space.unhighlight}
+        @spaces.each{|space| 
+        	space.unhighlight
+        	space.unvalidate}
     		@pieces.each{|piece|
     			if piece_mouse_between(piece)
     				piece.validate_moves
     				piece.spaces.each {|space|
-    					@selected_spaces.push(space) unless space.is_filled
     				}
     				@selected_pieces.push(piece)
     			end
@@ -64,19 +64,24 @@ class GameWindow < Gosu::Window
     	end
 
     	if Gosu::button_down? Gosu::MsRight
-        @selected_spaces.each{|space| 
+        spaces.each{|space| 
         	if space_mouse_between(space)
-        		@selected_pieces.each{|piece| 
-        			puts "Pre : Xpos " + piece.xpos.to_s + "Ypos " + piece.ypos.to_s
+        		@selected_pieces.each{|piece|
         			piece.move(space)
-        			puts "Post : Xpos " + piece.xpos.to_s + "Ypos " + piece.ypos.to_s
         		}
         	end
         }
       end
         
     	@spaces.each{|space| 
-        space.filled?
+    		space.is_filled = false
+
+    		pieces.each {|piece|
+        	if space.xpos == piece.xpos && space.ypos == piece.ypos
+          	space.is_filled = true
+        	end
+      	}
+
         if space.highlighted
 					space.color = Gosu::Color.argb(0xff_2ecc71)
 				end

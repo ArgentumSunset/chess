@@ -29,22 +29,30 @@ class Piece
         case @movenum 
             when 5
             @spaces = @window.spaces.select{|space| 
-                (space.xpos == @xpos && space.ypos.between?(@ypos - 1, @ypos + 1)) ||
-                (space.ypos == @ypos && space.xpos.between?(@xpos - 1, @xpos + 1))
+                ((space.xpos == @xpos && space.ypos.between?(@ypos - 1, @ypos + 1)) ||
+                (space.ypos == @ypos && space.xpos.between?(@xpos - 1, @xpos + 1))) && 
+                !space.is_filled
             }
             validate
         end
     end
 
     def move(space)
-        @xpos = space.xpos
-        @ypos = space.ypos
+        if space.is_valid 
+            @xpos = space.xpos
+            @ypos = space.ypos
+            @x = (MARGIN * 2) + (@xpos * SPACE_DIMEN) - (SPACE_DIMEN / 2.0) - (@image.width / 2.0)
+            @y = (MARGIN * 2) + (@ypos * SPACE_DIMEN) - (SPACE_DIMEN / 2.0) - (@image.height / 2.0)
+        end
     end
 
     private
     
     def validate
-        @spaces.each{|space| space.highlight unless space.is_filled}
+        @spaces.each{|space| 
+            space.highlight
+            space.validate
+        }
     end
 
 end
