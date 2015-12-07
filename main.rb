@@ -56,8 +56,7 @@ class GameWindow < Gosu::Window
     		@pieces.each{|piece|
     			if piece_mouse_between(piece)
     				piece.validate_moves
-    				piece.spaces.each {|space|
-    				}
+
     				@selected_pieces.push(piece)
     			end
     		}
@@ -67,6 +66,7 @@ class GameWindow < Gosu::Window
         spaces.each{|space| 
         	if space_mouse_between(space)
         		@selected_pieces.each{|piece|
+        			piece.take(space)
         			piece.move(space)
         		}
         	end
@@ -78,7 +78,9 @@ class GameWindow < Gosu::Window
 
     		pieces.each {|piece|
         	if space.xpos == piece.xpos && space.ypos == piece.ypos
+        		space.team = piece.team
           	space.is_filled = true
+          	piece.piece == "king" ? space.king = true : space.king = false
         	end
       	}
 
@@ -115,5 +117,5 @@ end
 
 window = GameWindow.new
 window.show
-window.spaces.each{|space| puts space.is_filled.to_s + " x: " + space.xpos.to_s + " y: " + space.ypos.to_s }
+window.spaces.each{|space| puts space.is_filled.to_s + " x: " + space.xpos.to_s + " y: " + space.ypos.to_s + " " + space.team}
 window.pieces.each{|piece| puts piece.piece + " x: " + piece.xpos.to_s + " y: " + piece.ypos.to_s }

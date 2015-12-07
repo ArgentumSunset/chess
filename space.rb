@@ -4,7 +4,7 @@ class Space
 	MARGIN = DIMEN / 10
 	SPACE_DIMEN = (DIMEN - (2 * MARGIN))/8
 
-    attr_accessor :x, :y, :xpos, :ypos, :dimen, :color, :stored, :zorder, :highlighted, :is_filled, :is_valid
+    attr_accessor :x, :y, :xpos, :ypos, :dimen, :color, :stored, :zorder, :highlighted, :is_filled, :is_valid, :team, :king
 
     def initialize(x,y,dimen,color,zorder,window)
 		@x = x
@@ -19,10 +19,12 @@ class Space
     @is_filled = false
     @window = window
     @is_valid = false
+    @team = ""
+    @king = false
 	end
 
 	def draw
-        Gosu.draw_line(x, y, color, x + dimen, y, color, zorder)
+    Gosu.draw_line(x, y, color, x + dimen, y, color, zorder)
 		Gosu.draw_line(x + dimen, y, color, x + dimen, y + dimen, color, zorder)
 		Gosu.draw_line(x + dimen, y + dimen, color, x, y + dimen, color, zorder)
 		Gosu.draw_line(x, y + dimen, color, x, y, color, zorder)

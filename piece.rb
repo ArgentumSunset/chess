@@ -31,7 +31,7 @@ class Piece
             @spaces = @window.spaces.select{|space| 
                 ((space.xpos == @xpos && space.ypos.between?(@ypos - 1, @ypos + 1)) ||
                 (space.ypos == @ypos && space.xpos.between?(@xpos - 1, @xpos + 1))) && 
-                !space.is_filled
+                (space.team != @team || !space.is_filled)
             }
             validate
         end
@@ -44,6 +44,11 @@ class Piece
             @x = (MARGIN * 2) + (@xpos * SPACE_DIMEN) - (SPACE_DIMEN / 2.0) - (@image.width / 2.0)
             @y = (MARGIN * 2) + (@ypos * SPACE_DIMEN) - (SPACE_DIMEN / 2.0) - (@image.height / 2.0)
         end
+    end
+
+    def take(space)
+        doomed = @window.pieces.find{|piece| piece.xpos == @xpos && piece.team != @team}
+        puts "Doomed: " + doomed.to_s + " | Self: " + self.to_s
     end
 
     private
