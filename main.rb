@@ -24,9 +24,12 @@ class GameWindow < Gosu::Window
 
         lines.each{|piece| 
         piece_data = piece.split(' ')
+        		if piece_data[0].to_i == 1
                 @pieces.push(Piece.new(piece_data[2],0,piece_data[1],"white",2,piece_data[3],self))
                 @pieces.push(Piece.new(piece_data[2],7,piece_data[1],"black",2,piece_data[3],self))
-            if piece_data[0].to_i > 1 
+            else
+            		@pieces.push(Piece.new(piece_data[2],0,piece_data[1],"white",2,piece_data[4],self))
+                @pieces.push(Piece.new(piece_data[2],7,piece_data[1],"black",2,piece_data[4],self))
                 @pieces.push(Piece.new(piece_data[3],0,piece_data[1],"white",2,piece_data[4],self))
                 @pieces.push(Piece.new(piece_data[3],7,piece_data[1],"black",2,piece_data[4],self))
             end
@@ -75,14 +78,7 @@ class GameWindow < Gosu::Window
         
     	@spaces.each{|space| 
     		space.is_filled = false
-
-    		pieces.each {|piece|
-        	if space.xpos == piece.xpos && space.ypos == piece.ypos
-        		space.team = piece.team
-          	space.is_filled = true
-          	piece.piece == "king" ? space.king = true : space.king = false
-        	end
-      	}
+    		space.find_piece
 
         if space.highlighted
 					space.color = Gosu::Color.argb(0xff_2ecc71)
@@ -117,5 +113,5 @@ end
 
 window = GameWindow.new
 window.show
-window.spaces.each{|space| puts space.is_filled.to_s + " x: " + space.xpos.to_s + " y: " + space.ypos.to_s + " " + space.team}
-window.pieces.each{|piece| puts piece.piece + " x: " + piece.xpos.to_s + " y: " + piece.ypos.to_s }
+window.spaces.each{|space| puts space.is_filled.to_s + " x: " + space.xpos.to_s + " y: " + space.ypos.to_s}
+window.pieces.each{|piece| puts piece.piece + " x: " + piece.xpos.to_s + " y: " + piece.ypos.to_s + " Movenum: " + piece.movenum.to_s}

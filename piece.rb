@@ -4,7 +4,7 @@ class Piece
     MARGIN = DIMEN / 10
     SPACE_DIMEN = (DIMEN - (2 * MARGIN))/8
 
-    attr_accessor :xpos, :ypos, :x, :y, :image, :piece, :team, :spaces
+    attr_accessor :xpos, :ypos, :x, :y, :image, :piece, :team, :spaces, :movenum
     
     def initialize(x,y,piece,team,zorder,movenum,window)
         @xpos = x.to_i
@@ -29,9 +29,16 @@ class Piece
         case @movenum 
             when 5
             @spaces = @window.spaces.select{|space| 
-                ((space.xpos == @xpos && space.ypos.between?(@ypos - 1, @ypos + 1)) ||
-                (space.ypos == @ypos && space.xpos.between?(@xpos - 1, @xpos + 1))) && 
-                (space.team != @team || !space.is_filled)
+                team = (space.find_piece ? space.find_piece.team : false)
+                straight_moves(team, space, 1, 1)
+            }
+            validate
+            when 1
+                puts "Hello! Your moves are: " + @spaces.to_s
+                @spaces = @window.spaces.select{|space|
+                team = (space.find_piece ? space.find_piece.team : false)
+                straight_moves(team, space, 8, 8)
+                
             }
             validate
         end
@@ -47,8 +54,13 @@ class Piece
     end
 
     def take(space)
-        doomed = @window.pieces.find{|piece| piece.xpos == @xpos && piece.team != @team}
-        puts "Doomed: " + doomed.to_s + " | Self: " + self.to_s
+        piece = space.find_piece
+        if piece
+            if piece.team != @team
+                doomed = piece
+                @window.pieces.delete(doomed)
+            end
+        end
     end
 
     private
@@ -58,6 +70,12 @@ class Piece
             space.highlight
             space.validate
         }
+    end
+
+    def straight_moves(team, space, xlim, ylim)
+        ((space.xpos == @xpos && space.ypos.between?(@ypos - ylim, @ypos + ylim)) ||
+        (space.ypos == @ypos && space.xpos.between?(@xpos - xlim, @xpos + xlim))) && 
+        (team != @team || !space.is_filled)
     end
 
 end

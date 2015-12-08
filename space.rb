@@ -19,8 +19,6 @@ class Space
     @is_filled = false
     @window = window
     @is_valid = false
-    @team = ""
-    @king = false
 	end
 
 	def draw
@@ -47,6 +45,12 @@ class Space
   def unhighlight
     @highlighted = false
     @color = @stored
+	end
+
+	def find_piece
+		piece = @window.pieces.find{|piece| piece.xpos == @xpos && piece.ypos == @ypos}
+		piece != nil ? @is_filled = true : @is_filled = false
+		piece != nil ? piece : false
 	end
 
 	private
