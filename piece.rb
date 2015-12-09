@@ -27,19 +27,11 @@ class Piece
     def validate_moves
         @spaces = []
         case @movenum 
-            when 5
-            @spaces = @window.spaces.select{|space| 
-                team = (space.find_piece ? space.find_piece.team : false)
-                straight_moves(team, space, 1, 1)
-            }
+            when 5 
+                straight_moves(1, 1)
             validate
             when 1
-                puts "Hello! Your moves are: " + @spaces.to_s
-                @spaces = @window.spaces.select{|space|
-                team = (space.find_piece ? space.find_piece.team : false)
-                straight_moves(team, space, 8, 8)
-                
-            }
+                straight_moves(8, 8)
             validate
         end
     end
@@ -72,10 +64,14 @@ class Piece
         }
     end
 
-    def straight_moves(team, space, xlim, ylim)
-        ((space.xpos == @xpos && space.ypos.between?(@ypos - ylim, @ypos + ylim)) ||
-        (space.ypos == @ypos && space.xpos.between?(@xpos - xlim, @xpos + xlim))) && 
-        (team != @team || !space.is_filled)
+    def straight_moves(xlim, ylim)
+            y_array = @window.spaces.select{|space| space.xpos == @xpos && space.ypos.between?(@ypos - ylim, @ypos + ylim)}
+            x_array = @window.spaces.select{|space| space.ypos == @ypos && space.ypos.between?(@xpos - ylim, @xpos + ylim)}
+            for i in 1...(y_array.length + x_array.length) do
+                @spaces[i] = y_array[i]
+                @spaces[i + y_array.length] = x_array[i]
+            end
     end
+
 
 end
