@@ -24,14 +24,14 @@ class GameWindow < Gosu::Window
 
         lines.each{|piece| 
         piece_data = piece.split(' ')
-        		if piece_data[0].to_i == 1
-                @pieces.push(Piece.new(piece_data[2],0,piece_data[1],"white",2,piece_data[3],self))
-                @pieces.push(Piece.new(piece_data[2],7,piece_data[1],"black",2,piece_data[3],self))
+        	if piece_data[0].to_i == 1
+                @pieces.push(Piece.new(piece_data[2],0,piece_data[1],"white",2,piece_data[3],self,1))
+                @pieces.push(Piece.new(piece_data[2],7,piece_data[1],"black",2,piece_data[3],self,1))
             else
-            		@pieces.push(Piece.new(piece_data[2],0,piece_data[1],"white",2,piece_data[4],self))
-                @pieces.push(Piece.new(piece_data[2],7,piece_data[1],"black",2,piece_data[4],self))
-                @pieces.push(Piece.new(piece_data[3],0,piece_data[1],"white",2,piece_data[4],self))
-                @pieces.push(Piece.new(piece_data[3],7,piece_data[1],"black",2,piece_data[4],self))
+            	@pieces.push(Piece.new(piece_data[2],0,piece_data[1],"white",2,piece_data[4],self,1))
+                @pieces.push(Piece.new(piece_data[2],7,piece_data[1],"black",2,piece_data[4],self,1))
+                @pieces.push(Piece.new(piece_data[3],0,piece_data[1],"white",2,piece_data[4],self,1))
+                @pieces.push(Piece.new(piece_data[3],7,piece_data[1],"black",2,piece_data[4],self,1))
             end
             }
 	end
@@ -54,7 +54,6 @@ class GameWindow < Gosu::Window
         if Gosu::button_down? Gosu::MsLeft
         @selected_pieces = []
         @spaces.each{|space| 
-        	space.unhighlight
         	space.unvalidate}
     		@pieces.each{|piece|
     			if piece_mouse_between(piece)
@@ -79,10 +78,6 @@ class GameWindow < Gosu::Window
     	@spaces.each{|space| 
     		space.is_filled = false
     		space.find_piece
-
-        if space.highlighted
-					space.color = Gosu::Color.argb(0xff_2ecc71)
-				end
 			}
     end
 
@@ -92,11 +87,11 @@ class GameWindow < Gosu::Window
 		for i in 0..7
 			for j in 0..7
 				i % 2 == 0 ? h = j : h = j + 1
-				h % 2 == 0 ? color = Gosu::Color.argb(0xff_c0392b) : color = Gosu::Color.argb(0xff_2c3e50)
+				h % 2 == 0 ? color = 0xffc0392b : color = 0xff2c3e50
 				@spaces.push(Space.new(MARGIN + (SPACE_DIMEN * i), MARGIN + (SPACE_DIMEN * j), SPACE_DIMEN, color, 0, self))
 			end
-            @pieces.push(Piece.new(i,1,"pawn","white",2,5,self))
-            @pieces.push(Piece.new(i,6,"pawn","black",2,5,self))
+            @pieces.push(Piece.new(i,1,"pawn","white",2,5,self,2))
+            @pieces.push(Piece.new(i,6,"pawn","black",2,5,self,2))
 		end
 	end
 

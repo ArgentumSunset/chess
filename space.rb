@@ -4,7 +4,7 @@ class Space
 	MARGIN = DIMEN / 10
 	SPACE_DIMEN = (DIMEN - (2 * MARGIN))/8
 
-    attr_accessor :x, :y, :xpos, :ypos, :dimen, :color, :stored, :zorder, :highlighted, :is_filled, :is_valid, :team, :king
+    attr_accessor :x, :y, :xpos, :ypos, :dimen, :color, :zorder, :is_filled, :is_valid
 
     def initialize(x,y,dimen,color,zorder,window)
 		@x = x
@@ -13,25 +13,19 @@ class Space
 		@ypos = (@y - 100) / 100
 		@dimen = dimen
 		@color = color
-    @stored = color
-    @zorder = zorder
-    @highlighted = false
-    @is_filled = false
-    @window = window
-    @is_valid = false
+    	@zorder = zorder
+    	@is_filled = false
+    	@window = window
+    	@is_valid = false
 	end
 
 	def draw
-    Gosu.draw_line(x, y, color, x + dimen, y, color, zorder)
+    	Gosu.draw_line(x, y, color, x + dimen, y, color, zorder)
 		Gosu.draw_line(x + dimen, y, color, x + dimen, y + dimen, color, zorder)
 		Gosu.draw_line(x + dimen, y + dimen, color, x, y + dimen, color, zorder)
 		Gosu.draw_line(x, y + dimen, color, x, y, color, zorder)
 
 		fill_shape(color)
-	end
-
-	def highlight
-		@highlighted = true
 	end
 
 	def validate
@@ -40,11 +34,6 @@ class Space
 
 	def unvalidate
 		@is_valid = false
-	end
-    
-  def unhighlight
-    @highlighted = false
-    @color = @stored
 	end
 
 	def find_piece

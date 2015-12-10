@@ -6,7 +6,7 @@ class Piece
 
     attr_accessor :xpos, :ypos, :x, :y, :image, :piece, :team, :spaces, :movenum
     
-    def initialize(x,y,piece,team,zorder,movenum,window)
+    def initialize(x,y,piece,team,zorder,movenum,window,turn)
         @xpos = x.to_i
         @ypos = y.to_i
         @piece = piece
@@ -18,6 +18,7 @@ class Piece
         @zorder = zorder
         @window = window
         @spaces = []
+        @turn = turn
 	end
     
     def draw
@@ -26,13 +27,25 @@ class Piece
 
     def validate_moves
         @spaces = []
-        case @movenum 
-            when 5 
-                straight_moves(1, 1)
-            validate
+        case @movenum
+            when 0
+                straight_moves(1,1)
+                validate
             when 1
                 straight_moves(8, 8)
-            validate
+                validate 
+            when 2
+                diagonal_moves
+                validate
+            when 3
+                straight_moves(8,8)
+                diagonal_moves
+                validate
+            when 4
+                knight_moves
+            when 5 
+                @team == "black" ? pawn_moves(@turn) : pawn_moves(@turn)
+                validate
         end
     end
 
@@ -42,6 +55,7 @@ class Piece
             @ypos = space.ypos
             @x = (MARGIN * 2) + (@xpos * SPACE_DIMEN) - (SPACE_DIMEN / 2.0) - (@image.width / 2.0)
             @y = (MARGIN * 2) + (@ypos * SPACE_DIMEN) - (SPACE_DIMEN / 2.0) - (@image.height / 2.0)
+            @turn = 1
         end
     end
 
@@ -59,7 +73,6 @@ class Piece
     
     def validate
         @spaces.each{|space| 
-            space.highlight
             space.validate
         }
     end
@@ -94,6 +107,55 @@ class Piece
             }
     end
 
+    def diagonal_moves
+        arr1 = []
+        arr2 = []
+        pos2 = 70
+        neg2 = 0
+        pos1 = 70
+        neg1 = 0
+        @window.spaces.each{|space| 
+            diagonal_calculate(1,1,space,arr1)
+            diagonal_calculate(-1,1,space,arr2)
+            diagonal_calculate(1,-1,space,arr2)
+            diagonal_calculate(-1,-1,space,arr1)
+        }
+        arr1.each{|space|
+            if space.is_filled && space.xpos > @xpos
+                pos1 = space.xpos unless pos1 < space.xpos
+            elsif space.is_filled && space.xpos < @xpos
+                neg1 = space.xpos unless neg1 > space.xpos
+            end
+        }
+        arr2.each{|space|
+            if space.is_filled && space.xpos > @xpos
+                pos2 = space.xpos unless pos2 < space.xpos
+            elsif space.is_filled && space.xpos < @xpos
+                neg2 = space.xpos unless neg2 > space.xpos
+            end
+        }
 
+        arr1.each{|space|
+            (space.xpos > pos1 || space.xpos < neg1) || (space.is_filled && space.find_piece.team == team) ? false : @spaces.push(space)
+        }
+
+        arr2.each{|space|
+            (space.xpos > pos2 || space.xpos < neg2) || (space.is_filled && space.find_piece.team == team) ? false : @spaces.push(space)
+        }
+    end
+
+    def diagonal_calculate(int1, int2, space, arr)
+        for i in 0..7
+            if space.xpos == @xpos + (int1 * i) && space.ypos == @ypos + (int2 * i)
+                arr.push(space)
+            end
+        end
+    end
+
+    def pawn_moves(num)
+        @spaces += @window.spaces.select{|space| (space.xpos == @xpos && space.ypos.between?(@ypos, @ypos + num)) && !space.is_filled}
+    end
 
 end
+
+
