@@ -47,7 +47,7 @@ class Piece
 
     def take(space)
         piece = space.find_piece
-        if piece
+        if piece && space.is_valid
             if piece.team != @team
                 doomed = piece
                 @window.pieces.delete(doomed)
@@ -65,13 +65,35 @@ class Piece
     end
 
     def straight_moves(xlim, ylim)
+            posy = 70
+            negy = 0
+            posx = 70
+            negx = 0
             y_array = @window.spaces.select{|space| space.xpos == @xpos && space.ypos.between?(@ypos - ylim, @ypos + ylim)}
-            x_array = @window.spaces.select{|space| space.ypos == @ypos && space.ypos.between?(@xpos - ylim, @xpos + ylim)}
-            for i in 1...(y_array.length + x_array.length) do
-                @spaces[i] = y_array[i]
-                @spaces[i + y_array.length] = x_array[i]
-            end
+            x_array = @window.spaces.select{|space| space.ypos == @ypos && space.xpos.between?(@xpos - xlim, @xpos + xlim)}
+            x_array.each{|space|
+                if space.is_filled && space.xpos > @xpos
+                    posx = space.xpos unless posx < space.xpos
+                elsif space.is_filled && space.xpos < @xpos
+                    negx = space.xpos unless negx > space.xpos
+                end
+            }
+            y_array.each{|space|
+                if space.is_filled && space.ypos > @ypos
+                    posy = space.ypos unless posy < space.ypos
+                elsif space.is_filled && space.ypos < @ypos
+                    negy = space.ypos unless negy > space.ypos
+                end
+            }
+
+            x_array.each{|space|
+                (space.xpos > posx || space.xpos < negx) || (space.is_filled && space.find_piece.team == team) ? false : @spaces.push(space)
+            }
+            y_array.each{|space|
+                space.ypos > posy || space.ypos < negy || (space.is_filled && space.find_piece.team == team) ? false : @spaces.push(space)
+            }
     end
+
 
 
 end
