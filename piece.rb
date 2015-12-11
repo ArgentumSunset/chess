@@ -42,9 +42,11 @@ class Piece
                 diagonal_moves
                 validate
             when 4
-                knight_moves
+                knight_moves(2,1)
+                knight_moves(1,2)
+                validate
             when 5 
-                @team == "black" ? pawn_moves(@turn) : pawn_moves(@turn)
+                pawn_moves(@turn)
                 validate
         end
     end
@@ -74,6 +76,7 @@ class Piece
     def validate
         @spaces.each{|space| 
             space.validate
+            space.highlight
         }
     end
 
@@ -152,8 +155,18 @@ class Piece
         end
     end
 
+    # def find(space, pos, neg, x)
+    #     space_pos = (x ? space.xpos : space.ypos)
+    # end
+
     def pawn_moves(num)
-        @spaces += @window.spaces.select{|space| (space.xpos == @xpos && space.ypos.between?(@ypos, @ypos + num)) && !space.is_filled}
+        x = (@team == 'black' ? @ypos - num : @ypos)
+        y = (@team == 'black' ? @ypos : @ypos + num)
+        @spaces += @window.spaces.select{|space| (space.xpos == @xpos && space.ypos.between?(x, y)) && !space.is_filled}
+    end
+
+    def knight_moves(x,y)
+        @spaces += @window.spaces.select{|space| (space.xpos == @xpos + x || space.xpos == @xpos - x) && (space.ypos == @ypos + y || space.ypos == @ypos - y) && ( !space.is_filled || space.find_piece.team != @team)}
     end
 
 end

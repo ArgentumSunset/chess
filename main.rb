@@ -54,7 +54,8 @@ class GameWindow < Gosu::Window
         if Gosu::button_down? Gosu::MsLeft
         @selected_pieces = []
         @spaces.each{|space| 
-        	space.unvalidate}
+        	space.unvalidate
+            space.unhighlight}
     		@pieces.each{|piece|
     			if piece_mouse_between(piece)
     				piece.validate_moves
@@ -66,6 +67,7 @@ class GameWindow < Gosu::Window
 
     	if Gosu::button_down? Gosu::MsRight
         spaces.each{|space| 
+            space.unhighlight
         	if space_mouse_between(space)
         		@selected_pieces.each{|piece|
         			piece.take(space)
@@ -78,6 +80,7 @@ class GameWindow < Gosu::Window
     	@spaces.each{|space| 
     		space.is_filled = false
     		space.find_piece
+                space.color = (space.highlighted ? 0xff2ecc71 : space.stored)
 			}
     end
 
