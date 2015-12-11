@@ -87,20 +87,27 @@ class Piece
             negx = 0
             y_array = @window.spaces.select{|space| space.xpos == @xpos && space.ypos.between?(@ypos - ylim, @ypos + ylim)}
             x_array = @window.spaces.select{|space| space.ypos == @ypos && space.xpos.between?(@xpos - xlim, @xpos + xlim)}
-            x_array.each{|space|
-                if space.is_filled && space.xpos > @xpos
-                    posx = space.xpos unless posx < space.xpos
-                elsif space.is_filled && space.xpos < @xpos
-                    negx = space.xpos unless negx > space.xpos
-                end
-            }
-            y_array.each{|space|
-                if space.is_filled && space.ypos > @ypos
-                    posy = space.ypos unless posy < space.ypos
-                elsif space.is_filled && space.ypos < @ypos
-                    negy = space.ypos unless negy > space.ypos
-                end
-            }
+            # x_array.each{|space|
+            #     if space.is_filled && space.xpos > @xpos
+            #         posx = space.xpos unless posx < space.xpos
+            #     elsif space.is_filled && space.xpos < @xpos
+            #         negx = space.xpos unless negx > space.xpos
+            #     end
+            # }
+
+            # y_array.each{|space|
+            #     if space.is_filled && space.ypos > @ypos
+            #         posy = space.ypos unless posy < space.ypos
+            #     elsif space.is_filled && space.ypos < @ypos
+            #         negy = space.ypos unless negy > space.ypos
+            #     end
+            # }
+
+            posx = find(x_array, posx, negx, true)[0]
+            negx = find(x_array, posx, negx, true)[1]
+
+            posy = find(y_array, posy, negy, false)[0]
+            negy = find(y_array, posy, negy, false)[1]
 
             x_array.each{|space|
                 (space.xpos > posx || space.xpos < negx) || (space.is_filled && space.find_piece.team == team) ? false : @spaces.push(space)
@@ -123,20 +130,11 @@ class Piece
             diagonal_calculate(1,-1,space,arr2)
             diagonal_calculate(-1,-1,space,arr1)
         }
-        arr1.each{|space|
-            if space.is_filled && space.xpos > @xpos
-                pos1 = space.xpos unless pos1 < space.xpos
-            elsif space.is_filled && space.xpos < @xpos
-                neg1 = space.xpos unless neg1 > space.xpos
-            end
-        }
-        arr2.each{|space|
-            if space.is_filled && space.xpos > @xpos
-                pos2 = space.xpos unless pos2 < space.xpos
-            elsif space.is_filled && space.xpos < @xpos
-                neg2 = space.xpos unless neg2 > space.xpos
-            end
-        }
+        pos1 = find(arr1, pos1, neg1, true)[0]
+        neg1 = find(arr1, pos1, neg1, true)[1]
+
+        pos2 = find(arr2, pos2, neg2, true)[0]
+        neg2 = find(arr2, pos2, neg2, true)[1]
 
         arr1.each{|space|
             (space.xpos > pos1 || space.xpos < neg1) || (space.is_filled && space.find_piece.team == team) ? false : @spaces.push(space)
@@ -155,9 +153,18 @@ class Piece
         end
     end
 
-    # def find(space, pos, neg, x)
-    #     space_pos = (x ? space.xpos : space.ypos)
-    # end
+    def find(arr, pos, neg, is_x)
+        arr.each{|space|
+            space_pos = (is_x ? space.xpos : space.ypos)
+            this_pos = (is_x ? @xpos : @ypos)
+            if space.is_filled && space_pos > this_pos
+                pos = space_pos unless pos < space_pos
+            elsif space.is_filled && space_pos < this_pos
+                neg = space_pos unless neg > space_pos
+            end
+        }
+        return [pos,neg]
+    end
 
     def pawn_moves(num)
         x = (@team == 'black' ? @ypos - num : @ypos)
