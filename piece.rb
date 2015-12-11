@@ -4,7 +4,7 @@ class Piece
     MARGIN = DIMEN / 10
     SPACE_DIMEN = (DIMEN - (2 * MARGIN))/8
 
-    attr_accessor :xpos, :ypos, :x, :y, :image, :piece, :team, :spaces, :movenum
+    attr_accessor :xpos, :ypos, :x, :y, :image, :piece, :team, :spaces, :movenum, :in_check
     
     def initialize(x,y,piece,team,zorder,movenum,window,turn)
         @xpos = x.to_i
@@ -89,6 +89,7 @@ class Piece
             if space.xpos == king_x && space.ypos == king_y
                 king_team = (@team == "white" ? "black" : "white")
                 puts "The " + king_team + " king is in check"
+                @window.pieces.each{|piece| piece.in_check = (piece.piece == "king" && piece.team == king_team ? true : false)}
                 checking = true
             end
         }

@@ -22,7 +22,7 @@ class Space
 	end
 
 	def draw
-    	Gosu.draw_line(x, y, color, x + dimen, y, color, zorder)
+    Gosu.draw_line(x, y, color, x + dimen, y, color, zorder)
 		Gosu.draw_line(x + dimen, y, color, x + dimen, y + dimen, color, zorder)
 		Gosu.draw_line(x + dimen, y + dimen, color, x, y + dimen, color, zorder)
 		Gosu.draw_line(x, y + dimen, color, x, y, color, zorder)
