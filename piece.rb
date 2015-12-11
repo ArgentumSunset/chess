@@ -71,6 +71,21 @@ class Piece
         end
     end
 
+    def checking?
+        king_x = 70
+        king_y = 70
+        @window.pieces.each{|piece|
+            if piece.piece == "king" && piece.team != @team
+                king_x = piece.xpos
+                king_y = piece.ypos
+            end
+        }
+        @spaces.each{|space|
+            king_team = (@team == "white" ? "black" : "white")
+            puts "The " + king_team + " is in check" if space.xpos == king_x && space.ypos == king_y
+        }
+    end
+
     private
     
     def validate
@@ -87,21 +102,6 @@ class Piece
             negx = 0
             y_array = @window.spaces.select{|space| space.xpos == @xpos && space.ypos.between?(@ypos - ylim, @ypos + ylim)}
             x_array = @window.spaces.select{|space| space.ypos == @ypos && space.xpos.between?(@xpos - xlim, @xpos + xlim)}
-            # x_array.each{|space|
-            #     if space.is_filled && space.xpos > @xpos
-            #         posx = space.xpos unless posx < space.xpos
-            #     elsif space.is_filled && space.xpos < @xpos
-            #         negx = space.xpos unless negx > space.xpos
-            #     end
-            # }
-
-            # y_array.each{|space|
-            #     if space.is_filled && space.ypos > @ypos
-            #         posy = space.ypos unless posy < space.ypos
-            #     elsif space.is_filled && space.ypos < @ypos
-            #         negy = space.ypos unless negy > space.ypos
-            #     end
-            # }
 
             posx = find(x_array, posx, negx, true)[0]
             negx = find(x_array, posx, negx, true)[1]
@@ -137,11 +137,11 @@ class Piece
         neg2 = find(arr2, pos2, neg2, true)[1]
 
         arr1.each{|space|
-            (space.xpos > pos1 || space.xpos < neg1) || (space.is_filled && space.find_piece.team == team) ? false : @spaces.push(space)
+            (space.xpos > pos1 || space.xpos < neg1) || (space.is_filled && space.find_piece.team == @team) ? false : @spaces.push(space)
         }
 
         arr2.each{|space|
-            (space.xpos > pos2 || space.xpos < neg2) || (space.is_filled && space.find_piece.team == team) ? false : @spaces.push(space)
+            (space.xpos > pos2 || space.xpos < neg2) || (space.is_filled && space.find_piece.team == @team) ? false : @spaces.push(space)
         }
     end
 
@@ -169,7 +169,9 @@ class Piece
     def pawn_moves(num)
         x = (@team == 'black' ? @ypos - num : @ypos)
         y = (@team == 'black' ? @ypos : @ypos + num)
+        take_y = (@team == 'black' ? @ypos - 1 : @ypos + 1)
         @spaces += @window.spaces.select{|space| (space.xpos == @xpos && space.ypos.between?(x, y)) && !space.is_filled}
+        @spaces += @window.spaces.select{|space| (space.xpos == @xpos + 1 || space.xpos == @xpos - 1) && space.ypos == take_y && (space.is_filled && space.find_piece.team != @team)}
     end
 
     def knight_moves(x,y)

@@ -18,6 +18,8 @@ class GameWindow < Gosu::Window
 		@i = 0
 		@time = Gosu::milliseconds
 		@selected_pieces = []
+        @team = "white"
+        @valid = false
         
         data = File.read('pieces.txt')
 				lines = data.split("\n")
@@ -52,36 +54,47 @@ class GameWindow < Gosu::Window
     def update
         
         if Gosu::button_down? Gosu::MsLeft
-        @selected_pieces = []
-        @spaces.each{|space| 
-        	space.unvalidate
-            space.unhighlight}
-    		@pieces.each{|piece|
-    			if piece_mouse_between(piece)
-    				piece.validate_moves
-
-    				@selected_pieces.push(piece)
-    			end
+            @selected_pieces = []
+            @spaces.each{|space| 
+            	space.unvalidate
+                space.unhighlight
+            }
+    	    @pieces.each{|piece|
+    	   	   if piece_mouse_between(piece)
+                    if piece.team == @team
+                        piece.validate_moves
+    			        @selected_pieces.push(piece)
+                        @valid = true
+                    end
+    		   end
     		}
     	end
 
-    	if Gosu::button_down? Gosu::MsRight
-        spaces.each{|space| 
-            space.unhighlight
-        	if space_mouse_between(space)
-        		@selected_pieces.each{|piece|
-        			piece.take(space)
-        			piece.move(space)
-        		}
-        	end
-        }
-      end
+    	if Gosu::button_down? Gosu::MsRight 
+            if @time < Gosu::milliseconds
+                @time = Gosu::milliseconds + 500
+                spaces.each{|space| 
+                    space.unhighlight
+        	        if space_mouse_between(space)
+        		      @selected_pieces.each{|piece|
+        			    piece.take(space)
+        			    piece.move(space)
+                        piece.checking?
+        		      }
+        	        end
+                }
+                if @valid 
+                    @team = (@team == "black" ? "white" : "black")
+                    @valid = false
+                end
+            end
+        end
         
     	@spaces.each{|space| 
     		space.is_filled = false
     		space.find_piece
-                space.color = (space.highlighted ? 0xff2ecc71 : space.stored)
-			}
+            space.color = (space.highlighted ? 0xff2ecc71 : space.stored)
+		}
     end
 
 	private
@@ -112,4 +125,4 @@ end
 window = GameWindow.new
 window.show
 window.spaces.each{|space| puts space.is_filled.to_s + " x: " + space.xpos.to_s + " y: " + space.ypos.to_s}
-window.pieces.each{|piece| puts piece.piece + " x: " + piece.xpos.to_s + " y: " + piece.ypos.to_s + " Movenum: " + piece.movenum.to_s}
+window.pieces.each{|piece| puts piece.team + " " + piece.piece + " x: " + piece.xpos.to_s + " y: " + piece.ypos.to_s + " Movenum: " + piece.movenum.to_s}
