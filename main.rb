@@ -62,7 +62,7 @@ class GameWindow < Gosu::Window
     	    @pieces.each{|piece|
     	   	   if piece_mouse_between(piece)
                     if piece.team == @team
-                        piece.validate_moves
+                        piece.validate_moves(true)
     			        @selected_pieces.push(piece)
                         @valid = true
                     end
@@ -79,7 +79,6 @@ class GameWindow < Gosu::Window
         		      @selected_pieces.each{|piece|
         			    piece.take(space)
         			    piece.move(space)
-                        piece.checking?
         		      }
         	        end
                 }
@@ -95,6 +94,10 @@ class GameWindow < Gosu::Window
     		space.find_piece
             space.color = (space.highlighted ? 0xff2ecc71 : space.stored)
 		}
+
+        @pieces.each{|piece|
+            piece.checking?
+        }
     end
 
 	private

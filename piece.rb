@@ -19,35 +19,36 @@ class Piece
         @window = window
         @spaces = []
         @turn = turn
+        @in_check = false
 	end
     
     def draw
         @image.draw(@x,@y,@zorder)
     end
 
-    def validate_moves
+    def validate_moves(will_validate)
         @spaces = []
         case @movenum
             when 0
                 straight_moves(1,1)
-                validate
+                validate if will_validate
             when 1
                 straight_moves(8, 8)
-                validate 
+                validate if will_validate 
             when 2
                 diagonal_moves
-                validate
+                validate if will_validate
             when 3
                 straight_moves(8,8)
                 diagonal_moves
-                validate
+                validate if will_validate
             when 4
                 knight_moves(2,1)
                 knight_moves(1,2)
-                validate
+                validate if will_validate
             when 5 
                 pawn_moves(@turn)
-                validate
+                validate if will_validate
         end
     end
 
@@ -74,6 +75,10 @@ class Piece
     def checking?
         king_x = 70
         king_y = 70
+        checking = false
+
+        validate_moves(false)
+
         @window.pieces.each{|piece|
             if piece.piece == "king" && piece.team != @team
                 king_x = piece.xpos
@@ -81,9 +86,14 @@ class Piece
             end
         }
         @spaces.each{|space|
-            king_team = (@team == "white" ? "black" : "white")
-            puts "The " + king_team + " is in check" if space.xpos == king_x && space.ypos == king_y
+            if space.xpos == king_x && space.ypos == king_y
+                king_team = (@team == "white" ? "black" : "white")
+                puts "The " + king_team + " king is in check"
+                checking = true
+            end
         }
+        @spaces = []
+        checking
     end
 
     private
