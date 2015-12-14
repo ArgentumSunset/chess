@@ -31,16 +31,17 @@ class Piece
         case @movenum
             when 0
                 straight_moves(1,1)
+                diagonal_moves(1,1)
                 validate if will_validate
             when 1
                 straight_moves(8, 8)
                 validate if will_validate 
             when 2
-                diagonal_moves
+                diagonal_moves(8,8)
                 validate if will_validate
             when 3
                 straight_moves(8,8)
-                diagonal_moves
+                diagonal_moves(8,8)
                 validate if will_validate
             when 4
                 knight_moves(2,1)
@@ -97,6 +98,20 @@ class Piece
         checking
     end
 
+    def mated?
+        if @in_check
+            validate_moves(false)
+            @spaces.each{|space|
+                if space.is_filled
+                    if space.find_piece.team != @team
+                        @spaces.delete(space)
+                        true
+                    end
+                end
+            }
+        end
+    end
+
     private
     
     def validate
@@ -128,7 +143,7 @@ class Piece
             }
     end
 
-    def diagonal_moves
+    def diagonal_moves(xlim, ylim)
         arr1 = []
         arr2 = []
         pos2 = 70
@@ -136,10 +151,10 @@ class Piece
         pos1 = 70
         neg1 = 0
         @window.spaces.each{|space| 
-            diagonal_calculate(1,1,space,arr1)
-            diagonal_calculate(-1,1,space,arr2)
-            diagonal_calculate(1,-1,space,arr2)
-            diagonal_calculate(-1,-1,space,arr1)
+            diagonal_calculate(1,1,space,arr1,xlim,ylim)
+            diagonal_calculate(-1,1,space,arr2,xlim,ylim)
+            diagonal_calculate(1,-1,space,arr2,xlim,ylim)
+            diagonal_calculate(-1,-1,space,arr1,xlim,ylim)
         }
         pos1 = find(arr1, pos1, neg1, true)[0]
         neg1 = find(arr1, pos1, neg1, true)[1]
@@ -156,9 +171,13 @@ class Piece
         }
     end
 
-    def diagonal_calculate(int1, int2, space, arr)
+    def diagonal_calculate(int1, int2, space, arr, xlim, ylim)
+        x1 = (int1 == 1 ? @xpos : @xpos - xlim)
+        x2 = (int1 == 1 ? @xpos + xlim : @xpos)
+        y1 = (int2 == 1 ? @ypos : @ypos - ylim)
+        y2 = (int2 == 1 ? @ypos + ylim : @ypos)
         for i in 0..7
-            if space.xpos == @xpos + (int1 * i) && space.ypos == @ypos + (int2 * i)
+            if space.xpos == @xpos + (int1 * i) && space.ypos == @ypos + (int2 * i) && space.xpos.between?(x1,x2) && space.ypos.between?(y1,y2)
                 arr.push(space)
             end
         end

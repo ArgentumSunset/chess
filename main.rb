@@ -95,6 +95,9 @@ class GameWindow < Gosu::Window
                 }
             end
         end
+
+        king = @pieces.find{|piece| piece.mated?}
+        puts king.piece unless king == nil
         
     	@spaces.each{|space| 
     		space.is_filled = false
