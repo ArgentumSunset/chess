@@ -73,6 +73,7 @@ class GameWindow < Gosu::Window
                         @valid = true
                     end
     		   end
+               @pieces.each{|protector| protector.protected_spaces.each{|space| @piece.is_protected = true if space.xpos == piece.xpos && space.ypos == piece.ypos && space.team == piece.team}} # No idea if this will work
     		}
     	end
 
@@ -96,8 +97,8 @@ class GameWindow < Gosu::Window
             end
         end
 
-        king = @pieces.find{|piece| piece.mated?}
-        puts king.piece unless king == nil
+        king = @pieces.find{|piece| piece.mated?(@pieces.find{|piece| piece.is_checking})}
+        puts king.spaces unless king == nil
         
     	@spaces.each{|space| 
     		space.is_filled = false
@@ -138,4 +139,4 @@ end
 window = GameWindow.new
 window.show
 window.spaces.each{|space| puts space.is_filled.to_s + " x: " + space.xpos.to_s + " y: " + space.ypos.to_s}
-window.pieces.each{|piece| puts "In check: " + piece.in_check.to_s + " " + piece.team + " " + piece.piece + " x: " + piece.xpos.to_s + " y: " + piece.ypos.to_s + " Movenum: " + piece.movenum.to_s}
+window.pieces.each{|piece| puts "Checking: " + piece.is_checking.to_s + " " + piece.team + " " + piece.piece + " x: " + piece.xpos.to_s + " y: " + piece.ypos.to_s + " Movenum: " + piece.movenum.to_s}

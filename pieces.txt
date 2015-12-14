@@ -1,5 +1,5 @@
 1 king 3 0
 1 queen 4 3
-2 knight 2 5 4
-2 bishop 1 6 2
+2 knight 1 6 4
+2 bishop 2 5 2
 2 rook 0 7 1

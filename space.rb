@@ -4,7 +4,7 @@ class Space
 	MARGIN = DIMEN / 10
 	SPACE_DIMEN = (DIMEN - (2 * MARGIN))/8
 
-    attr_accessor :x, :y, :xpos, :ypos, :dimen, :color, :zorder, :is_filled, :is_valid, :stored, :highlighted
+    attr_accessor :x, :y, :xpos, :ypos, :dimen, :color, :zorder, :is_filled, :is_valid, :stored, :highlighted, :team
 
     def initialize(x,y,dimen,color,zorder,window)
 		@x = x
@@ -14,11 +14,12 @@ class Space
 		@dimen = dimen
 		@color = color
 		@stored = color
-    	@zorder = zorder
-    	@is_filled = false
-    	@window = window
-    	@is_valid = false
-    	@highlighted = false
+    @zorder = zorder
+    @is_filled = false
+    @window = window
+    @is_valid = false
+    @highlighted = false
+    @team = ""
 	end
 
 	def draw
@@ -49,7 +50,8 @@ class Space
 	def find_piece
 		piece = @window.pieces.find{|piece| piece.xpos == @xpos && piece.ypos == @ypos}
 		piece != nil ? @is_filled = true : @is_filled = false
-		piece != nil ? piece : false
+		piece != nil ? @team = piece.team : @team = ""
+		piece unless piece == nil
 	end
 
 	private

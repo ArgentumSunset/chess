@@ -4,7 +4,7 @@ class Piece
     MARGIN = DIMEN / 10
     SPACE_DIMEN = (DIMEN - (2 * MARGIN))/8
 
-    attr_accessor :xpos, :ypos, :x, :y, :image, :piece, :team, :spaces, :movenum, :in_check
+    attr_accessor :xpos, :ypos, :x, :y, :image, :piece, :team, :spaces, :protected_spaces, :movenum, :in_check, :mated, :is_checking, :is_protected
     
     def initialize(x,y,piece,team,zorder,movenum,window,turn)
         @xpos = x.to_i
@@ -18,8 +18,12 @@ class Piece
         @zorder = zorder
         @window = window
         @spaces = []
+        @protected_spaces = []
         @turn = turn
         @in_check = false
+        @is_checking = false
+        @mated = false
+        @is_protected = false
 	end
     
     def draw
@@ -89,8 +93,8 @@ class Piece
         @spaces.each{|space|
             if space.xpos == king_x && space.ypos == king_y
                 king_team = (@team == "white" ? "black" : "white")
-                puts "The " + king_team + " king is in check"
                 @window.pieces.each{|piece| piece.in_check = (piece.piece == "king" && piece.team == king_team ? true : false)}
+                @is_checking = true
                 checking = true
             end
         }
@@ -98,13 +102,13 @@ class Piece
         checking
     end
 
-    def mated?
+    def mated?(checking_piece)
         if @in_check
-            validate_moves(false)
             @spaces.each{|space|
                 if space.is_filled
                     if space.find_piece.team != @team
-                        @spaces.delete(space)
+                        space.unvalidate
+                        space.unhighlight
                         true
                     end
                 end
@@ -119,6 +123,7 @@ class Piece
             space.validate
             space.highlight
         }
+        @protected_spaces.each{|space| space.highlight}
     end
 
     def straight_moves(xlim, ylim)
@@ -136,10 +141,12 @@ class Piece
             negy = find(y_array, posy, negy, false)[1]
 
             x_array.each{|space|
-                (space.xpos > posx || space.xpos < negx) || (space.is_filled && space.find_piece.team == team) ? false : @spaces.push(space)
+                (space.xpos > posx || space.xpos < negx) || (space.is_filled && space.team == team) ? false : @spaces.push(space)
+                (space.xpos == posx || space.xpos == negx) && (space.is_filled && space.team == team) ? @protected_spaces.push(space) : false
             }
             y_array.each{|space|
-                space.ypos > posy || space.ypos < negy || (space.is_filled && space.find_piece.team == team) ? false : @spaces.push(space)
+                space.ypos > posy || space.ypos < negy || (space.is_filled && space.team == team) ? false : @spaces.push(space)
+                (space.ypos == posy || space.ypos == negy) && (space.is_filled && space.team == team) ? @protected_spaces.push(space) : false
             }
     end
 
@@ -163,11 +170,13 @@ class Piece
         neg2 = find(arr2, pos2, neg2, true)[1]
 
         arr1.each{|space|
-            (space.xpos > pos1 || space.xpos < neg1) || (space.is_filled && space.find_piece.team == @team) ? false : @spaces.push(space)
+            (space.xpos > pos1 || space.xpos < neg1) || (space.is_filled && space.team == @team) ? false : @spaces.push(space)
+            (space.is_filled && space.team == team) ? @protected_spaces.push(space) : false        
         }
 
         arr2.each{|space|
-            (space.xpos > pos2 || space.xpos < neg2) || (space.is_filled && space.find_piece.team == @team) ? false : @spaces.push(space)
+            (space.xpos > pos2 || space.xpos < neg2) || (space.is_filled && space.team == @team) ? false : @spaces.push(space)
+            (space.is_filled && space.team == team) ? @protected_spaces.push(space) : false
         }
     end
 
@@ -201,11 +210,18 @@ class Piece
         y = (@team == 'black' ? @ypos : @ypos + num)
         take_y = (@team == 'black' ? @ypos - 1 : @ypos + 1)
         @spaces += @window.spaces.select{|space| (space.xpos == @xpos && space.ypos.between?(x, y)) && !space.is_filled}
-        @spaces += @window.spaces.select{|space| (space.xpos == @xpos + 1 || space.xpos == @xpos - 1) && space.ypos == take_y && (space.is_filled && space.find_piece.team != @team)}
+        @spaces += @window.spaces.select{|space| (space.xpos == @xpos + 1 || space.xpos == @xpos - 1) && space.ypos == take_y && (space.is_filled && space.team != @team)}
     end
 
     def knight_moves(x,y)
-        @spaces += @window.spaces.select{|space| (space.xpos == @xpos + x || space.xpos == @xpos - x) && (space.ypos == @ypos + y || space.ypos == @ypos - y) && ( !space.is_filled || space.find_piece.team != @team)}
+        @window.spaces.each{|space| 
+            @spaces.push(space) if is_knight_move(space,x,y) && ( !space.is_filled || space.team != @team)
+            @protected_spaces.push(space) if is_knight_move(space,x,y) && space.team == @team
+        }
+    end
+
+    def is_knight_move(space,x,y)
+        (space.xpos == @xpos + x || space.xpos == @xpos - x) && (space.ypos == @ypos + y || space.ypos == @ypos - y)
     end
 
 end
