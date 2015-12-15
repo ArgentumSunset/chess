@@ -4,7 +4,7 @@ class Piece
     MARGIN = DIMEN / 10
     SPACE_DIMEN = (DIMEN - (2 * MARGIN))/8
 
-    attr_accessor :xpos, :ypos, :x, :y, :image, :piece, :team, :spaces, :protected_spaces, :movenum, :in_check, :is_checking, :is_protected, :can_block
+    attr_accessor :xpos, :ypos, :x, :y, :image, :piece, :team, :spaces, :protected_spaces, :movenum, :in_check, :is_checking, :is_protected, :prev_space, :can_block, :mated
     
     def initialize(x,y,piece,team,zorder,movenum,window,turn)
         @xpos = x.to_i
@@ -18,7 +18,9 @@ class Piece
         @zorder = zorder
         @window = window
         @spaces = []
+        @false_spaces = []
         @protected_spaces = []
+        @prev_space
         @turn = turn
         @in_check = false
         @is_checking = false
@@ -56,6 +58,16 @@ class Piece
                 pawn_moves(@turn)
                 validate if will_validate
         end
+
+        @false_spaces.each{|false_space|
+                @spaces.each{|space|
+                    if false_space.xpos == space.xpos && false_space.ypos == space.ypos
+                        @spaces.delete(space) 
+                        space.unvalidate
+                        space.unhighlight
+                    end
+                }
+        }
     end
 
     def move(space)
@@ -66,6 +78,10 @@ class Piece
             @y = (MARGIN * 2) + (@ypos * SPACE_DIMEN) - (SPACE_DIMEN / 2.0) - (@image.height / 2.0)
             @turn = 1
         end
+    end
+
+    def undo_move
+
     end
 
     def take(space)
@@ -104,31 +120,42 @@ class Piece
     end
 
     def mated?(checking_piece)
+        @false_spaces = []
         can_piece_block = false
-        checking_piece.validate_moves(false) unless checking_piece == nil
+        checking_piece.validate_moves(false)
         validate_moves(false)
 
         if @in_check && checking_piece
-            @spaces.each{|space|
-                if checking_piece.is_protected && space.find_piece == checking_piece
-                    space.unvalidate
-                    @spaces.delete(space)
-                end
-            }
 
             @window.pieces.each{|piece|  
-                piece.validate_moves(false)
+                piece.validate_moves(false) if piece.piece != "king"
                 if piece.team == @team
                     piece.spaces.each{|space|
                         checking_piece.spaces.each{|checking_space|
-                            piece.can_block = (checking_space.xpos == space.xpos && checking_space.ypos == space.ypos) || (checking_piece.xpos == space.xpos && checking_piece.ypos == space.ypos) && piece.piece != "king"
+                            piece.can_block = (checking_space.xpos == space.xpos && checking_space.ypos == space.ypos) || (checking_piece.xpos == space.xpos && checking_piece.ypos == space.ypos)
                             can_piece_block = true if piece.can_block
                         }
                     }
                 end
             }
 
-            @spaces == [] && !can_piece_block ? true : false
+            @spaces.each{|space|
+                checking_piece.spaces.each{|checking_space|
+                    if checking_space.xpos == space.xpos && checking_space.ypos == space.ypos
+                        @false_spaces.push(space)
+                    end
+                }
+                if checking_piece.is_protected && space.xpos == checking_piece.xpos && space.ypos == checking_piece.ypos
+                    @false_spaces.push(space)
+                end
+            }
+
+            validate_moves(false)
+
+            puts spaces.length.to_s
+            puts @mated
+
+            @mated = (@spaces.length == 0 ? true : false)
 
         end
     end
@@ -136,6 +163,7 @@ class Piece
     private
     
     def validate
+
         @spaces.each{|space| 
             space.validate
             space.highlight
