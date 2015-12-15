@@ -107,8 +107,7 @@ class Piece
             @spaces.each{|space|
                 if space.is_filled
                     if space.find_piece.team != @team
-                        space.unvalidate
-                        space.unhighlight
+                        space.unvalidate if checking_piece.is_protected
                         true
                     end
                 end
@@ -142,11 +141,11 @@ class Piece
 
             x_array.each{|space|
                 (space.xpos > posx || space.xpos < negx) || (space.is_filled && space.team == team) ? false : @spaces.push(space)
-                (space.xpos == posx || space.xpos == negx) && (space.is_filled && space.team == team) ? @protected_spaces.push(space) : false
+                (space.xpos == posx || space.xpos == negx) && (space.is_filled && space.team == team) && !(space.xpos == @xpos && space.ypos == @ypos) ? @protected_spaces.push(space) : false
             }
             y_array.each{|space|
                 space.ypos > posy || space.ypos < negy || (space.is_filled && space.team == team) ? false : @spaces.push(space)
-                (space.ypos == posy || space.ypos == negy) && (space.is_filled && space.team == team) ? @protected_spaces.push(space) : false
+                (space.ypos == posy || space.ypos == negy) && (space.is_filled && space.team == team) && !(space.xpos == @xpos && space.ypos == @ypos) ? @protected_spaces.push(space) : false
             }
     end
 
@@ -171,12 +170,12 @@ class Piece
 
         arr1.each{|space|
             (space.xpos > pos1 || space.xpos < neg1) || (space.is_filled && space.team == @team) ? false : @spaces.push(space)
-            (space.is_filled && space.team == team) ? @protected_spaces.push(space) : false        
+            (space.is_filled && space.team == team && !(space.xpos == @xpos && space.ypos == @ypos)) ? @protected_spaces.push(space) : false        
         }
 
         arr2.each{|space|
             (space.xpos > pos2 || space.xpos < neg2) || (space.is_filled && space.team == @team) ? false : @spaces.push(space)
-            (space.is_filled && space.team == team) ? @protected_spaces.push(space) : false
+            (space.is_filled && space.team == team && !(space.xpos == @xpos && space.ypos == @ypos)) ? @protected_spaces.push(space) : false
         }
     end
 
@@ -216,7 +215,7 @@ class Piece
     def knight_moves(x,y)
         @window.spaces.each{|space| 
             @spaces.push(space) if is_knight_move(space,x,y) && ( !space.is_filled || space.team != @team)
-            @protected_spaces.push(space) if is_knight_move(space,x,y) && space.team == @team
+            @protected_spaces.push(space) if is_knight_move(space,x,y) && space.team == @team && !(space.xpos == @xpos && space.ypos == @ypos)
         }
     end
 

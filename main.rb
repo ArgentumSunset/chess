@@ -17,6 +17,7 @@ class GameWindow < Gosu::Window
 		@pieces = []
 		@i = 0
 		@time = Gosu::milliseconds
+        @time2 = Gosu::milliseconds
 		@selected_pieces = []
         @is_checked = ""
         @team = "white"
@@ -73,13 +74,12 @@ class GameWindow < Gosu::Window
                         @valid = true
                     end
     		   end
-               @pieces.each{|protector| protector.protected_spaces.each{|space| @piece.is_protected = true if space.xpos == piece.xpos && space.ypos == piece.ypos && space.team == piece.team}} # No idea if this will work
     		}
     	end
 
     	if Gosu::button_down? Gosu::MsRight 
             if @time < Gosu::milliseconds && @valid
-                @time = Gosu::milliseconds + 500
+                @time = Gosu::milliseconds + 200
                 spaces.each{|space| 
                     space.unhighlight
         	        if space_mouse_between(space) && space.is_valid
@@ -97,8 +97,17 @@ class GameWindow < Gosu::Window
             end
         end
 
-        king = @pieces.find{|piece| piece.mated?(@pieces.find{|piece| piece.is_checking})}
-        puts king.spaces unless king == nil
+        if @time2 < Gosu::milliseconds
+            @time2 = Gosu::milliseconds + 200
+            @pieces.each{|piece|
+                piece.is_protected = false
+                @pieces.each{|protector| protector.protected_spaces.each{|space|
+                    piece.is_protected = true if space.xpos == piece.xpos && space.ypos == piece.ypos && protector.team == piece.team
+                }}
+            }
+            king = @pieces.find{|piece| piece.mated?(@pieces.find{|piece| piece.is_checking})}
+            puts king.spaces unless king == nil
+        end
         
     	@spaces.each{|space| 
     		space.is_filled = false
@@ -139,4 +148,4 @@ end
 window = GameWindow.new
 window.show
 window.spaces.each{|space| puts space.is_filled.to_s + " x: " + space.xpos.to_s + " y: " + space.ypos.to_s}
-window.pieces.each{|piece| puts "Checking: " + piece.is_checking.to_s + " " + piece.team + " " + piece.piece + " x: " + piece.xpos.to_s + " y: " + piece.ypos.to_s + " Movenum: " + piece.movenum.to_s}
+window.pieces.each{|piece| puts "Protected: " + piece.is_protected.to_s + " Checking: " + piece.is_checking.to_s + " " + piece.team + " " + piece.piece + " x: " + piece.xpos.to_s + " y: " + piece.ypos.to_s + " Movenum: " + piece.movenum.to_s}
