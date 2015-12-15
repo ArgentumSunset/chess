@@ -21,10 +21,14 @@ class GameWindow < Gosu::Window
 		@selected_pieces = []
         @is_checked = ""
         @team = "white"
-        @team_final = @team.split.map(&:capitalize).join(' ')
         @valid = false
         @turn_display = Gosu::Font.new(40)
         @check_display = Gosu::Font.new(40)
+        @mated_display = Gosu::Font.new(40)
+        @checked_team = ""
+        @mated_team = ""
+        @winning_team = (@mated_team == "black" ? "white" : "black")
+        @checkmated = false
         
         data = File.read('pieces.txt')
 				lines = data.split("\n")
@@ -50,8 +54,11 @@ class GameWindow < Gosu::Window
         @spaces.each{|space| space.draw}
 		@pieces.each{|piece| piece.draw}
 		@i += 1
-        @turn_display.draw("#{@team_final}'s turn", 405, 30, 2, 1.0, 1.0, 0xff_ecf0f1)
+        @turn_display.draw("#{capitalize(@team)}'s turn", 405, 30, 2, 1.0, 1.0, 0xff_ecf0f1)
         @check_display.draw(@is_checked, 310, 930, 2, 1.0, 1.0, 0xff_ecf0f1)
+        if @checkmated
+            @mated_display.draw("#{capitalize(@winning_team)} has won!", 370, 930, 2, 1.0, 1.0, 0xff_ecf0f1)
+        end
 	end
     
     def needs_cursor?
@@ -59,6 +66,7 @@ class GameWindow < Gosu::Window
     end
 
     def update
+    if !@checkmated
         
         if Gosu::button_down? Gosu::MsLeft
             @selected_pieces = []
@@ -96,29 +104,24 @@ class GameWindow < Gosu::Window
                 }
             end
         end
-
-        if @time2 < Gosu::milliseconds
-            @time2 = Gosu::milliseconds + 200
-            @pieces.each{|piece|
-                piece.is_protected = false
-                @pieces.each{|protector| protector.protected_spaces.each{|space|
-                    piece.is_protected = true if space.xpos == piece.xpos && space.ypos == piece.ypos && protector.team == piece.team
-                }}
-            }
-            king = @pieces.find{|piece| piece.mated?(@pieces.find{|piece| piece.is_checking})}
-            puts king.spaces unless king == nil
-        end
-        
+     
     	@spaces.each{|space| 
     		space.is_filled = false
     		space.find_piece
             space.color = (space.highlighted ? 0xff2ecc71 : space.stored)
 		}
 
+        checking
+
         @pieces.each{|piece|
-            piece.checking?
-            @is_checked = "#{@team_final}'s king is in check!" if piece.checking?
+                piece.is_protected = false
+                piece.can_block = false
+                is_protected(piece)
         }
+        king = @pieces.find{|piece| piece.mated?(@pieces.find{|piece| piece.is_checking})}
+        @mated_team = king.team if king != nil
+
+    end
     end
 
 	private
@@ -143,9 +146,37 @@ class GameWindow < Gosu::Window
 			mouse_x.between?(space.x, space.x + space.dimen) && mouse_y.between?(space.y, space.y + space.dimen)
 		end
 
+        def capitalize(str)
+            str.split.map(&:capitalize).join(' ')
+        end
+
+        def is_protected(piece)
+            @pieces.each{|protector| protector.protected_spaces.each{|space|
+                if space.xpos == piece.xpos && space.ypos == piece.ypos && protector.team == piece.team
+                    piece.is_protected = true 
+                end
+            }}
+        end
+
+        def checking
+            @is_checked = ""
+            @pieces.each{|piece|
+            if piece.checking? && @mated_team == ""
+                @checked_team = (piece.team == "black" ? "white" : "black")
+                @is_checked = "#{capitalize(@checked_team)}'s king is in check!"
+            elsif @mated_team != ""
+                @is_checked = ""
+                @checkmated = true
+            end
+            }
+        end
+
 end
 
 window = GameWindow.new
 window.show
-window.spaces.each{|space| puts space.is_filled.to_s + " x: " + space.xpos.to_s + " y: " + space.ypos.to_s}
-window.pieces.each{|piece| puts "Protected: " + piece.is_protected.to_s + " Checking: " + piece.is_checking.to_s + " " + piece.team + " " + piece.piece + " x: " + piece.xpos.to_s + " y: " + piece.ypos.to_s + " Movenum: " + piece.movenum.to_s}
+window.pieces.each{|piece| 
+    piece.validate_moves(false)
+    puts piece.team + " " + piece.piece + " Checking: " + piece.is_checking.to_s + " Can Block: " + piece.can_block.to_s + " Protected: " + piece.is_protected.to_s + " Movable spaces: " + piece.spaces.length.to_s
+}
+

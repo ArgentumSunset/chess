@@ -4,7 +4,7 @@ class Piece
     MARGIN = DIMEN / 10
     SPACE_DIMEN = (DIMEN - (2 * MARGIN))/8
 
-    attr_accessor :xpos, :ypos, :x, :y, :image, :piece, :team, :spaces, :protected_spaces, :movenum, :in_check, :mated, :is_checking, :is_protected
+    attr_accessor :xpos, :ypos, :x, :y, :image, :piece, :team, :spaces, :protected_spaces, :movenum, :in_check, :is_checking, :is_protected, :can_block
     
     def initialize(x,y,piece,team,zorder,movenum,window,turn)
         @xpos = x.to_i
@@ -22,8 +22,9 @@ class Piece
         @turn = turn
         @in_check = false
         @is_checking = false
-        @mated = false
         @is_protected = false
+        @can_block = false
+        @mated = false
 	end
     
     def draw
@@ -103,15 +104,32 @@ class Piece
     end
 
     def mated?(checking_piece)
-        if @in_check
+        can_piece_block = false
+        checking_piece.validate_moves(false) unless checking_piece == nil
+        validate_moves(false)
+
+        if @in_check && checking_piece
             @spaces.each{|space|
-                if space.is_filled
-                    if space.find_piece.team != @team
-                        space.unvalidate if checking_piece.is_protected
-                        true
-                    end
+                if checking_piece.is_protected && space.find_piece == checking_piece
+                    space.unvalidate
+                    @spaces.delete(space)
                 end
             }
+
+            @window.pieces.each{|piece|  
+                piece.validate_moves(false)
+                if piece.team == @team
+                    piece.spaces.each{|space|
+                        checking_piece.spaces.each{|checking_space|
+                            piece.can_block = (checking_space.xpos == space.xpos && checking_space.ypos == space.ypos) || (checking_piece.xpos == space.xpos && checking_piece.ypos == space.ypos) && piece.piece != "king"
+                            can_piece_block = true if piece.can_block
+                        }
+                    }
+                end
+            }
+
+            @spaces == [] && !can_piece_block ? true : false
+
         end
     end
 
@@ -122,7 +140,6 @@ class Piece
             space.validate
             space.highlight
         }
-        @protected_spaces.each{|space| space.highlight}
     end
 
     def straight_moves(xlim, ylim)
