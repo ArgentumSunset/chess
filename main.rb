@@ -85,7 +85,6 @@ class GameWindow < Gosu::Window
             @selected_pieces = []
             @spaces.each{|space| 
             	space.unvalidate
-                space.unhighlight
             }
     	    @pieces.each{|piece|
     	   	   if piece_mouse_between(piece)
@@ -102,7 +101,6 @@ class GameWindow < Gosu::Window
             if @time < Gosu::milliseconds && @valid
                 @time = Gosu::milliseconds + 200
                 spaces.each{|space| 
-                    space.unhighlight
         	        if space_mouse_between(space) && space.is_valid
         		      @selected_pieces.each{|piece|
 
@@ -142,7 +140,6 @@ class GameWindow < Gosu::Window
     	@spaces.each{|space| 
     		space.is_filled = false
     		space.find_piece
-            space.color = (space.highlighted ? 0xff2ecc71 : space.stored)
 		}
 
         king = @pieces.find{|checked_king| checked_king.in_check}

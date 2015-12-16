@@ -4,7 +4,7 @@ class Space
 	MARGIN = DIMEN / 10
 	SPACE_DIMEN = (DIMEN - (2 * MARGIN))/8
 
-    attr_accessor :x, :y, :xpos, :ypos, :dimen, :color, :zorder, :is_filled, :is_valid, :stored, :highlighted, :team
+    attr_accessor :x, :y, :xpos, :ypos, :dimen, :color, :zorder, :is_filled, :is_valid, :team
 
     def initialize(x,y,dimen,color,zorder,window)
 		@x = x
@@ -13,13 +13,11 @@ class Space
 		@ypos = (@y - 100) / 100
 		@dimen = dimen
 		@color = color
-		@stored = color
-    @zorder = zorder
-    @is_filled = false
-    @window = window
-    @is_valid = false
-    @highlighted = false
-    @team = ""
+    	@zorder = zorder
+    	@is_filled = false
+    	@window = window
+    	@is_valid = false
+    	@team = ""
 	end
 
 	def draw
@@ -33,14 +31,6 @@ class Space
 
 	def validate
 		@is_valid = true
-	end
-
-	def highlight
-		@highlighted = true
-	end
-
-	def unhighlight
-		@highlighted = false
 	end
 
 	def unvalidate

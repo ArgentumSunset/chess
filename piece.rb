@@ -64,7 +64,6 @@ class Piece
                     if false_space.xpos == space.xpos && false_space.ypos == space.ypos
                         @spaces.delete(space) 
                         space.unvalidate
-                        space.unhighlight
                     end
                 }
         }
@@ -221,7 +220,6 @@ class Piece
     def validate
         @spaces.each{|space| 
             space.validate
-            space.highlight
         }
     end
 
