@@ -94,10 +94,22 @@ class Piece
         end
     end
 
+    def got_to_end?
+        side_pos = (team == "white" ? 7 : 0)
+        if @ypos == side_pos
+            @piece = "queen"
+            @movenum = 3
+            @image = Gosu::Image.new("imgs/queen-" + @team + ".png")
+            @x = (MARGIN * 2) + (@xpos * SPACE_DIMEN) - (SPACE_DIMEN / 2.0) - (@image.width / 2.0)
+            @y = (MARGIN * 2) + (@ypos * SPACE_DIMEN) - (SPACE_DIMEN / 2.0) - (@image.height / 2.0)
+        end
+    end
+
     def checking?
         king_x = 70
         king_y = 70
         checking = false
+        @is_checking = false
 
         validate_moves(false)
 

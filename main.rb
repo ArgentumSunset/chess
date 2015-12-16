@@ -25,10 +25,16 @@ class GameWindow < Gosu::Window
         @turn_display = Gosu::Font.new(40)
         @check_display = Gosu::Font.new(40)
         @mated_display = Gosu::Font.new(40)
+        @default_display = Gosu::Font.new(40)
+        @default_display2 = Gosu::Font.new(40)
         @checked_team = ""
         @mated_team = ""
         @winning_team = ""
         @checkmated = false
+        @checked = false
+        @lost_by_default_mess = ""
+        @lost_by_default_mess2 = ""
+        @lost_by_default = false
         
         data = File.read('pieces.txt')
 				lines = data.split("\n")
@@ -55,6 +61,8 @@ class GameWindow < Gosu::Window
 		@pieces.each{|piece| piece.draw}
 		@i += 1
         @turn_display.draw("#{capitalize(@team)}'s turn", 405, 30, 2, 1.0, 1.0, 0xff_ecf0f1)
+        @default_display.draw(@lost_by_default_mess, 100, 470, 2, 1.0, 1.0, 0xff_ecf0f1)
+        @default_display2.draw(@lost_by_default_mess2, 250, 530, 2, 1.0, 1.0, 0xff_ecf0f1)
         @check_display.draw(@is_checked, 310, 930, 2, 1.0, 1.0, 0xff_ecf0f1)
         if @checkmated
             @mated_display.draw("#{capitalize(@winning_team)} has won!", 370, 930, 2, 1.0, 1.0, 0xff_ecf0f1)
@@ -66,7 +74,7 @@ class GameWindow < Gosu::Window
     end
 
     def update
-    if !@checkmated
+    if !@checkmated && !@lost_by_default
 
         @pieces.each{|piece|
                 piece.is_protected = false
@@ -97,8 +105,15 @@ class GameWindow < Gosu::Window
                     space.unhighlight
         	        if space_mouse_between(space) && space.is_valid
         		      @selected_pieces.each{|piece|
+
         			    piece.take(space)
         			    piece.move(space)
+
+                        if @checked && @checked_team == piece.team
+                            @lost_by_default_mess = "#{capitalize(piece.team)} has not contested the check against them!"
+                            @lost_by_default_mess2 = "They have lost by default!"
+                            @lost_by_default = true
+                        end
 
                         if space.is_valid
                             @team = (@team == "black" ? "white" : "black")
@@ -112,6 +127,17 @@ class GameWindow < Gosu::Window
         end
 
         checking
+
+        @pieces.each {|piece|
+            @checked = true if piece.is_checking
+            if piece.piece == "pawn"
+                piece.got_to_end?
+            end
+        }
+
+        @pieces.each{|piece| piece.in_check = false } if @pieces.find{|piece| piece.is_checking} == nil
+
+        @checked = false if @pieces.find{|checked_king| checked_king.in_check} == nil
      
     	@spaces.each{|space| 
     		space.is_filled = false
@@ -126,7 +152,7 @@ class GameWindow < Gosu::Window
             if checking_piece
                 king.mated?(piece)
             end
-        }
+        } if king != nil
 
         @checkmated = true if king.mated unless king == nil
         @mated_team = (king.mated ? king.team : "") unless king == nil
