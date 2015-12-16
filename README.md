@@ -51,7 +51,7 @@ Doing this was incredibly hard, and at best the checkmate function I made is a r
 
 Checking was a total pain.
 
-	I didn't want to have to actually make a whole lot of functions that would undo a move if that move did not lead to a king's going out of check, so instead I made a function that simply says "White (or black) did not contest the check on them, therefore they forfeit by default." As good an incentive as any, I suppose, and it doesn't really detract from the overall game.
+I didn't want to have to actually make a whole lot of functions that would undo a move if that move did not lead to a king's going out of check, so instead I made a function that simply says "White (or black) did not contest the check on them, therefore they forfeit by default." As good an incentive as any, I suppose, and it doesn't really detract from the overall game.
 
 Pawns suck. They really, really suck.
 
