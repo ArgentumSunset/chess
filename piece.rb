@@ -152,8 +152,25 @@ class Piece
     def can_block?(checking_piece, king)  # checks to see if another piece on the checked king's side can block the check
         @can_block = false
         relevant_spaces = []
+        validate_moves(false)
 
-        if @movenum == 2 || @movenum == 4
+        if @movenum == 1 || @movenum == 3
+            @spaces.each{|space| 
+                casenum = (@xpos > king.xpos ? (@ypos > king.ypos ? 1 : 2) : (@ypos > king.ypos ? 3 : 4)) # gets direction of block for straight pieces
+                case casenum
+                    when 1
+                        relevant_spaces.push(space) if space.xpos < @xpos || space.ypos < @ypos
+                    when 2
+                        relevant_spaces.push(space) if space.xpos < @xpos || space.ypos > @ypos
+                    when 3
+                        relevant_spaces.push(space) if space.xpos > @xpos || space.ypos < @ypos
+                    when 4
+                        relevant_spaces.push(space) if space.xpos > @xpos || space.ypos > @ypos
+                end
+            }
+        end
+
+        if @movenum == 2 || @movenum == 3
             @spaces.each{|space| 
                 casenum = (@xpos > king.xpos ? (@ypos > king.ypos ? 1 : 2) : (@ypos > king.ypos ? 3 : 4)) # gets direction of block for diagonal pieces
                 case casenum
@@ -169,12 +186,11 @@ class Piece
             }
         end
 
-        if @movenum == 1 || @movenum == 4
+        if @movenum == 5 || @movenum == 4
             relevant_spaces += @spaces
         end
 
         if @team != checking_piece.team && @piece != "king"
-            validate_moves(false)
             relevant_spaces.each{|space|
                 @can_block = true if space.xpos == checking_piece.xpos && space.ypos == checking_piece.ypos
                 checking_piece.spaces.each{|checking_space|
