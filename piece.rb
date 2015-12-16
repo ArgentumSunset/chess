@@ -127,16 +127,8 @@ class Piece
 
         if @in_check && checking_piece
 
-            @window.pieces.each{|piece|  
-                piece.validate_moves(false) if piece.piece != "king"
-                if piece.team == @team
-                    piece.spaces.each{|space|
-                        checking_piece.spaces.each{|checking_space|
-                            piece.can_block = (checking_space.xpos == space.xpos && checking_space.ypos == space.ypos) || (checking_piece.xpos == space.xpos && checking_piece.ypos == space.ypos)
-                            can_piece_block = true if piece.can_block
-                        }
-                    }
-                end
+            @window.pieces.each{|piece|
+                can_piece_block = true if piece.can_block?(checking_piece, self) 
             }
 
             @spaces.each{|space|
@@ -152,25 +144,60 @@ class Piece
 
             validate_moves(false)
 
-            puts spaces.length.to_s
-            puts @mated
-
-            @mated = (@spaces.length == 0 ? true : false)
+            @mated = (@spaces.length == 0 && !can_piece_block ? true : false)
 
         end
     end
 
+    def can_block?(checking_piece, king)  # checks to see if another piece on the checked king's side can block the check
+        @can_block = false
+        relevant_spaces = []
+
+        if @movenum == 2 || @movenum == 4
+            @spaces.each{|space| 
+                casenum = (@xpos > king.xpos ? (@ypos > king.ypos ? 1 : 2) : (@ypos > king.ypos ? 3 : 4)) # gets direction of block for diagonal pieces
+                case casenum
+                    when 1
+                        relevant_spaces.push(space) if space.xpos > king.xpos && space.ypos > king.ypos
+                    when 2
+                        relevant_spaces.push(space) if space.xpos > king.xpos && space.ypos < king.ypos
+                    when 3
+                        relevant_spaces.push(space) if space.xpos < king.xpos && space.ypos > king.ypos
+                    when 4
+                        relevant_spaces.push(space) if space.xpos < king.xpos && space.ypos < king.ypos 
+                end
+            }
+        end
+
+        if @movenum == 1 || @movenum == 4
+            relevant_spaces += @spaces
+        end
+
+        if @team != checking_piece.team && @piece != "king"
+            validate_moves(false)
+            relevant_spaces.each{|space|
+                @can_block = true if space.xpos == checking_piece.xpos && space.ypos == checking_piece.ypos
+                checking_piece.spaces.each{|checking_space|
+                    @can_block = true if checking_space.xpos == space.xpos && checking_space.ypos == space.ypos
+                }
+            }
+            @can_block ? true : false
+        else
+            false
+        end
+    end
+
+
     private
     
     def validate
-
         @spaces.each{|space| 
             space.validate
             space.highlight
         }
     end
 
-    def straight_moves(xlim, ylim)
+    def straight_moves(xlim, ylim) # gets moves for rooks, straight parts of queens' paths, and kings
             posy = 70
             negy = 0
             posx = 70
@@ -194,7 +221,7 @@ class Piece
             }
     end
 
-    def diagonal_moves(xlim, ylim)
+    def diagonal_moves(xlim, ylim) # gets moves for bishops, diagonal parts of queens' paths, and kings
         arr1 = []
         arr2 = []
         pos2 = 70

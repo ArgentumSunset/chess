@@ -70,7 +70,6 @@ class GameWindow < Gosu::Window
 
         @pieces.each{|piece|
                 piece.is_protected = false
-                piece.can_block = false
                 is_protected(piece)
         }
         
@@ -188,7 +187,7 @@ window = GameWindow.new
 window.show
 window.pieces.each{|piece| 
     piece.validate_moves(false)
-    puts piece.team + " " + piece.piece + " Checking: " + piece.is_checking.to_s + " Can Block: " + piece.can_block.to_s + " Protected: " + piece.is_protected.to_s + " Movable spaces: " + piece.spaces.length.to_s
+    puts piece.team + " " + piece.piece + " Checking: " + piece.is_checking.to_s + " Can Block: " + piece.can_block.to_s + " Protected: " + piece.is_protected.to_s + " X: " + piece.xpos.to_s + " Y: " + piece.ypos.to_s
 }
 puts window.checkmated
 
